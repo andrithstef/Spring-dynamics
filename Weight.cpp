@@ -1,7 +1,7 @@
 #include "Weight.h"
+#include "utils.h"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <cmath>
-#include <iostream>
 #include <limits>
 
 Weight::Weight(float mass, const sf::Vector2f &position, float rotation,
@@ -23,15 +23,12 @@ void Weight::applyForce(const sf::Vector2f &force, const sf::Vector2f &location,
                         sf::RenderWindow &window) {
 
   // go from local coordinates to global coordinates
-  sf::Vector2f globalLocation =
-      rotatePoint(location + m_position, m_position + m_size / 2.f,
-                  m_rotation * 3.1415 / 180);
-
+  sf::Vector2f globalLocation = localToGlobalCoordinates(location);
 
   // Create a vertex array to hold the line
   sf::VertexArray line(sf::Lines, 2);
-  line[0].position = globalLocation - m_size / 2.f;
-  line[1].position = globalLocation - m_size / 2.f + 100.0f * force;
+  line[0].position = globalLocation;
+  line[1].position = globalLocation + 5.0f * force;
   line[0].color = sf::Color::Blue;
   line[1].color = sf::Color::Blue;
 
@@ -47,32 +44,32 @@ void Weight::applyForce(const sf::Vector2f &force, const sf::Vector2f &location,
     return;
   }
 
-  float torque =
-      calculateTorque(diff, force);
+  float torque = calculateTorque(diff, force);
 
   m_currentTorque += torque;
-
-    std::cout << m_velocity.y << std::endl;
 }
 
 void Weight::Update(float deltaTime, sf::RenderWindow &window) {
-  m_currentForce = sf::Vector2f(0.f, 0.f);
-  m_currentTorque = 0.f;
   // calculate all forces acting on the weight
 
-  applyForce(sf::Vector2f(10.f, 5.f), sf::Vector2f(0.f, 0.f),
+  applyForce(sf::Vector2f(0.f, 150.f), m_size/2.f,
              window); // gravity
 
-  m_angularVelocity += (m_currentTorque / 10) * deltaTime;
+  m_angularVelocity +=
+      (m_currentTorque / (m_mass * m_size.x * m_size.x / 12)) * deltaTime;
   m_rotation += m_angularVelocity * deltaTime;
 
   m_velocity += m_currentForce / m_mass * deltaTime;
   m_position += m_velocity * deltaTime;
+
+
+  m_currentForce = sf::Vector2f(0.f, 0.f);
+  m_currentTorque = 0.f;
 }
 
 void Weight::show(sf::RenderWindow &window) {
   sf::RectangleShape shape(m_size);
-  shape.setPosition(m_position);
+  shape.setPosition(m_position + m_size/2.f);
   shape.setOrigin(m_size / 2.f);
   shape.setRotation(m_rotation);
   shape.setFillColor(sf::Color::White);
@@ -80,30 +77,8 @@ void Weight::show(sf::RenderWindow &window) {
   window.draw(shape);
 }
 
-sf::Vector2f Weight::rotatePoint(const sf::Vector2f &p,
-                                 const sf::Vector2f &origin, float theta) {
-  sf::Vector2f translated = p - origin;
-
-  float cosTheta = std::cos(theta);
-  float sinTheta = std::sin(theta);
-
-  sf::Vector2f rotated;
-  rotated.x = translated.x * cosTheta - translated.y * sinTheta;
-  rotated.y = translated.x * sinTheta + translated.y * cosTheta;
-
-  sf::Vector2f result = rotated + origin;
-  return result;
-}
-
-float Weight::calculateTorque(sf::Vector2f r, sf::Vector2f force) {
-    float rMagnitude = std::hypot(r.x, r.y);  // Magnitude of vector r
-    float forceMagnitude = std::hypot(force.x, force.y);  // Magnitude of vector F
-    
-    // Calculate the angle between the vectors r and F
-    float angle = std::acos((r.x * force.x + r.y * force.y) / (rMagnitude * forceMagnitude));
-    
-    // Calculate the sign of the torque based on the orientation of vectors r and F
-    float crossProduct = (r.x * force.y) - (r.y * force.x);
-    float torque = rMagnitude * forceMagnitude * std::sin(angle) * (crossProduct >= 0 ? 1 : -1);
-    return torque;
+sf::Vector2f Weight::localToGlobalCoordinates(sf::Vector2f local) const {
+  // go from local coordinates to global coordinates
+  return rotatePoint(local + m_position, m_position + m_size / 2.f,
+                     m_rotation * 3.1415 / 180);
 }
