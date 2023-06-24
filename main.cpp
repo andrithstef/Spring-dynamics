@@ -10,7 +10,7 @@ int main() {
 
   float mass = 0.1;
   float rotation = 0;
-  sf::Vector2f position(501.f, 100.f);
+  sf::Vector2f position(500.f, 100.f);
   sf::Vector2f size(75.f, 75.f);
   Weight w = Weight(mass, position, rotation, size);
 
