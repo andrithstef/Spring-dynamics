@@ -46,13 +46,17 @@ void Weight::applyForce(const sf::Vector2f &force, const sf::Vector2f &location,
 
   float torque = calculateTorque(diff, force);
 
+  if (std::isnan(torque)) {
+    return;
+  }
+
   m_currentTorque += torque;
 }
 
 void Weight::Update(float deltaTime, sf::RenderWindow &window) {
   // calculate all forces acting on the weight
 
-  applyForce(sf::Vector2f(0.f, 150.f), m_size/2.f,
+  applyForce(sf::Vector2f(0.f, 200.f), m_size / 2.f,
              window); // gravity
 
   m_angularVelocity +=
@@ -62,14 +66,13 @@ void Weight::Update(float deltaTime, sf::RenderWindow &window) {
   m_velocity += m_currentForce / m_mass * deltaTime;
   m_position += m_velocity * deltaTime;
 
-
   m_currentForce = sf::Vector2f(0.f, 0.f);
   m_currentTorque = 0.f;
 }
 
 void Weight::show(sf::RenderWindow &window) {
   sf::RectangleShape shape(m_size);
-  shape.setPosition(m_position + m_size/2.f);
+  shape.setPosition(m_position + m_size / 2.f);
   shape.setOrigin(m_size / 2.f);
   shape.setRotation(m_rotation);
   shape.setFillColor(sf::Color::White);

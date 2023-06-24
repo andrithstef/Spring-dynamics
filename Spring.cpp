@@ -3,8 +3,8 @@
 #include <iostream>
 #include <limits>
 
-Spring::Spring(float length, float K, const sf::Vector2f &p1,
-               const sf::Vector2f &p2, Weight *connectedWeight1,
+Spring::Spring(float length, float K, sf::Vector2f p1,
+               sf::Vector2f p2, Weight *connectedWeight1,
                Weight *connectedWeight2)
     : m_length(length), m_K(K), m_p1(p1), m_p2(p2),
       m_connectedWeight1(connectedWeight1),
