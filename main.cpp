@@ -4,7 +4,7 @@
 #include "InputHandler.h"
 
 int main() {
-  sf::RenderWindow window(sf::VideoMode(1500.f, 1000.f), "SFML Project");
+  sf::RenderWindow window(sf::VideoMode(1500.f, 1000.f), "Spring Dynamics");
 
   EntityManager &entityManager = EntityManager::getInstance();
   InputHandler inputHandler = InputHandler();

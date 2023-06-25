@@ -19,13 +19,12 @@ private:
                       EntityManager &entityManager);
   void togglePause();
 
-  void placeWeight(sf::Event &event, sf::RenderWindow &window,
-                   EntityManager &entityManager);
+  void placeWeight();
 
-  void handleStartPlacingWeight(sf::Event &event, sf::RenderWindow &window,
+  void handleStartPlacingWeight(sf::RenderWindow &window,
                                 EntityManager &entityManager);
 
-  void handleStartPlacingSpring(sf::Event &event, sf::RenderWindow &window,
+  void handleStartPlacingSpring(sf::RenderWindow &window,
                                 EntityManager &entityManager);
 
   void handleFinishPlacingSpring(sf::Vector2f position);

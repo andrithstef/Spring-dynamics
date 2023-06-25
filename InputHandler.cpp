@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Keyboard.hpp>
-#include <iostream>
 
 #include "EntityManager.h"
 #include "InputHandler.h"
@@ -11,11 +10,6 @@ InputHandler::InputHandler() : m_gameState(GameState::getInstance()) {}
 void InputHandler::handleInputs(sf::RenderWindow &window,
                                 EntityManager &entityManager) {
   sf::Event event;
-  std::cout << "CURRENT STATUS" << std::endl;
-  std::cout << "is placing weight: " << m_isPlacingWeight << std::endl;
-  std::cout << "is placing spring: " << m_isPlacingSpring << std::endl;
-  std::cout << "current weight " << m_clickedWeight << std::endl;
-  std::cout << "current spring " << m_clickedSpring << std::endl;
   while (window.pollEvent(event)) {
     if (event.type == sf::Event::Closed)
       window.close();
@@ -48,7 +42,7 @@ void InputHandler::handleKeyPress(sf::Event &event, sf::RenderWindow &window,
       m_clickedWeight->setIsPressed(false);
     }
     m_isPlacingWeight = true;
-    handleStartPlacingWeight(event, window, entityManager);
+    handleStartPlacingWeight(window, entityManager);
   } else if (event.key.code == sf::Keyboard::S) {
     if (m_isPlacingSpring) {
       return;
@@ -57,12 +51,11 @@ void InputHandler::handleKeyPress(sf::Event &event, sf::RenderWindow &window,
       m_clickedWeight->setIsPressed(false);
     }
     m_isPlacingSpring = true;
-    handleStartPlacingSpring(event, window, entityManager);
+    handleStartPlacingSpring(window, entityManager);
   }
 }
 
-void InputHandler::handleStartPlacingWeight(sf::Event &event,
-                                            sf::RenderWindow &window,
+void InputHandler::handleStartPlacingWeight(sf::RenderWindow &window,
                                             EntityManager &entityManager) {
   m_isPlacingSpring = false;
   m_clickedSpring = nullptr;
@@ -76,8 +69,7 @@ void InputHandler::handleStartPlacingWeight(sf::Event &event,
   w->setIsPressed(true);
 }
 
-void InputHandler::handleStartPlacingSpring(sf::Event &event,
-                                            sf::RenderWindow &window,
+void InputHandler::handleStartPlacingSpring(sf::RenderWindow &window,
                                             EntityManager &entityManager) {
   m_clickedWeight = nullptr;
   m_isPlacingWeight = false;
@@ -101,7 +93,7 @@ void InputHandler::handleMouseClick(sf::Event &event, sf::RenderWindow &window,
                                     EntityManager &entityManager) {
   if (event.mouseButton.button == sf::Mouse::Left) {
     if (m_isPlacingWeight) {
-      placeWeight(event, window, entityManager);
+      placeWeight();
       return;
     }
 
@@ -142,9 +134,7 @@ void InputHandler::togglePause() {
   gameState.setPaused(!gameState.isPaused());
 }
 
-void InputHandler::placeWeight(sf::Event &event, sf::RenderWindow &window,
-                               EntityManager &entityManager) {
-
+void InputHandler::placeWeight() {
   m_clickedWeight->setIsPressed(false);
   m_clickedWeight = nullptr;
   m_isPlacingWeight = false;

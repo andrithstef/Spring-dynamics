@@ -7,7 +7,7 @@ Spring::Spring(sf::Vector2f p1, sf::Vector2f p2, Weight *connectedWeight1,
     : m_p1(p1), m_p2(p2), m_connectedWeight1(connectedWeight1),
       m_connectedWeight2(connectedWeight2) {}
 
-void Spring::Update(float deltaTime, sf::RenderWindow &window) {
+void Spring::Update(sf::RenderWindow &window) {
   if (m_isBeingPlaced) {
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     sf::Vector2f floatVector(static_cast<float>(mousePosition.x),
@@ -86,7 +86,6 @@ void Spring::Show(sf::RenderWindow &window) {
     endPoint2 = m_connectedWeight2->localToGlobalCoordinates(endPoint2);
   }
 
-
   sf::VertexArray wave(sf::LineStrip);
 
   // Define the properties of the sine wave
@@ -94,21 +93,23 @@ void Spring::Show(sf::RenderWindow &window) {
   int numPoints = 500;     // Number of points on the curve
 
   // Calculate the angle between a and b
-  float angle = std::atan2(endPoint2.y - endPoint1.y, endPoint2.x - endPoint1.x);
+  float angle =
+      std::atan2(endPoint2.y - endPoint1.y, endPoint2.x - endPoint1.x);
 
   float dist = std::hypot(endPoint1.x - endPoint2.x, endPoint1.y - endPoint2.y);
 
   for (int i = 0; i <= numPoints; ++i) {
     float t = static_cast<float>(i) / numPoints;
     float x = endPoint1.x + t * (dist);
-    float y = endPoint1.y + amplitude * std::sin((50 / dist) * M_PI * (x - endPoint1.x));
+    float y = endPoint1.y +
+              amplitude * std::sin((50 / dist) * M_PI * (x - endPoint1.x));
 
     // Rotate the point around point a
     sf::Vector2f rotatedPoint;
-    rotatedPoint.x =
-        std::cos(angle) * (x - endPoint1.x) - std::sin(angle) * (y - endPoint1.y) + endPoint1.x;
-    rotatedPoint.y =
-        std::sin(angle) * (x - endPoint1.x) + std::cos(angle) * (y - endPoint1.y) + endPoint1.y;
+    rotatedPoint.x = std::cos(angle) * (x - endPoint1.x) -
+                     std::sin(angle) * (y - endPoint1.y) + endPoint1.x;
+    rotatedPoint.y = std::sin(angle) * (x - endPoint1.x) +
+                     std::cos(angle) * (y - endPoint1.y) + endPoint1.y;
 
     wave.append(sf::Vertex(rotatedPoint, sf::Color(50, 50, 50)));
   }

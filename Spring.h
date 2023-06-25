@@ -8,7 +8,7 @@ public:
   Spring(sf::Vector2f p1, sf::Vector2f p2, Weight *connectedWeight1,
          Weight *connectedWeight2);
 
-  void Update(float deltaTime, sf::RenderWindow &window);
+  void Update(sf::RenderWindow &window);
 
   void Show(sf::RenderWindow &window);
 
