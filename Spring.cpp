@@ -3,9 +3,8 @@
 #include <iostream>
 #include <limits>
 
-Spring::Spring(float length, float K, sf::Vector2f p1,
-               sf::Vector2f p2, Weight *connectedWeight1,
-               Weight *connectedWeight2)
+Spring::Spring(float length, float K, sf::Vector2f p1, sf::Vector2f p2,
+               Weight *connectedWeight1, Weight *connectedWeight2)
     : m_length(length), m_K(K), m_p1(p1), m_p2(p2),
       m_connectedWeight1(connectedWeight1),
       m_connectedWeight2(connectedWeight2) {}
@@ -21,7 +20,6 @@ void Spring::Update(float deltaTime, sf::RenderWindow &window) {
     // need to convert from local to global coordinates
     endPoint1 = m_connectedWeight1->localToGlobalCoordinates(endPoint1);
   }
-  std::cout << "Endpoint1: " << endPoint1.x << endPoint1.y << std::endl;
 
   sf::Vector2f endPoint2 = m_p2;
   if (m_connectedWeight2 != nullptr) {
@@ -29,7 +27,6 @@ void Spring::Update(float deltaTime, sf::RenderWindow &window) {
     // need to convert from local to global coordinates
     endPoint2 = m_connectedWeight2->localToGlobalCoordinates(endPoint2);
   }
-  std::cout << "Endpoint2: " << endPoint2.x << endPoint2.y << std::endl;
 
   // get the length of this vector
   sf::Vector2f diff = endPoint2 - endPoint1;
@@ -44,16 +41,21 @@ void Spring::Update(float deltaTime, sf::RenderWindow &window) {
   // use hooks law for calculating foce magnitude
   float force = m_K * (magnitude - m_length);
 
-  sf::Vector2f forceVec = diff / magnitude * force;
-
-    std::cout << "Force: " << force << std::endl;
-
   if (m_connectedWeight1 != nullptr) {
-    m_connectedWeight1->applyForce(forceVec, m_p1, window);
+
+    sf::Vector2f forceVec1 =
+        diff / magnitude *
+        (force - 0.01f * std::hypot(m_connectedWeight1->getVelocity().x,
+                                    m_connectedWeight1->getVelocity().y));
+    m_connectedWeight1->applyForce(forceVec1, m_p1, window);
   }
 
   if (m_connectedWeight2 != nullptr) {
-    m_connectedWeight2->applyForce(-forceVec, m_p2, window);
+    sf::Vector2f forceVec2 =
+        diff / magnitude *
+        (force - 0.01f * std::hypot(m_connectedWeight2->getVelocity().x,
+                                    m_connectedWeight2->getVelocity().y));
+    m_connectedWeight2->applyForce(-forceVec2, m_p2, window);
   }
 }
 
@@ -79,10 +81,43 @@ void Spring::Show(sf::RenderWindow &window) {
     endPoint2 = m_connectedWeight2->localToGlobalCoordinates(endPoint2);
   }
 
-  line[0].position = endPoint1;
-  line[1].position = endPoint2;
-  line[0].color = sf::Color::Red;
-  line[1].color = sf::Color::Red;
+  // line[0].position = endPoint1;
+  // line[1].position = endPoint2;
+  // line[0].color = sf::Color::Red;
+  // line[1].color = sf::Color::Red;
 
-  window.draw(line);
+  // window.draw(line);
+
+
+
+    sf::Vector2f a = endPoint1;
+    sf::Vector2f b = endPoint2;
+
+    sf::VertexArray wave(sf::LineStrip);
+    wave.setPrimitiveType(sf::LineStrip);
+
+    // Define the properties of the sine wave
+    float amplitude = 10.0f;   // Amplitude of the wave
+    int numPoints = 500;        // Number of points on the curve
+
+    // Calculate the angle between a and b
+    float angle = std::atan2(b.y - a.y, b.x - a.x);
+    angle = 3.1415f/2.f;
+    float dist = std::hypot(a.x-b.x, a.y-b.y);
+
+    for (int i = 0; i <= numPoints; ++i)
+    {
+        float t = static_cast<float>(i) / numPoints;
+        float x = a.x + t * (b.x - a.x);
+        float y = a.y + amplitude * std::sin(50/dist * 3.1415 * (x - a.x));
+
+        // Rotate the point around point a
+        sf::Vector2f rotatedPoint;
+        rotatedPoint.x = std::cos(angle) * (x - a.x) - std::sin(angle) * (y - a.y) + a.x;
+        rotatedPoint.y = std::sin(angle) * (x - a.x) + std::cos(angle) * (y - a.y) + a.y;
+
+        wave.append(sf::Vertex(rotatedPoint, sf::Color::Red));
+    }
+
+  window.draw(wave);
 }

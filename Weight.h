@@ -10,6 +10,16 @@ public:
          const sf::Vector2f &size);
 
   void Update(float deltaTime, sf::RenderWindow &window);
+
+  /**
+   * Applies force to the weight.
+   *
+   * This function takes in a force on an object and uses it to update the total
+   * force and torque on the weight.
+   *
+   * @param force The force vector on the weight.
+   * @param location The local coordinates of the force.
+   */
   void applyForce(const sf::Vector2f &force, const sf::Vector2f &position,
                   sf::RenderWindow &window);
 
@@ -17,13 +27,19 @@ public:
   float getRotation();
   sf::Vector2f getPosition();
   sf::Vector2f getSize();
+  sf::Vector2f getVelocity();
 
   /*
    * Calculates the global coordinates for a local point
    */
   sf::Vector2f localToGlobalCoordinates(sf::Vector2f local) const;
 
-  void show(sf::RenderWindow &window);
+  /*
+   * Tells whether the weight overlaps the given position
+   */
+  bool overlapsPosition(const sf::Vector2f &position);
+
+  void Show(sf::RenderWindow &window);
 
 private:
   float m_mass;
