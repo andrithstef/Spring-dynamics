@@ -2,7 +2,14 @@
 
 #include <SFML/Graphics.hpp>
 
-
+/**
+ * Rotates a 2D point around a given origin by a specified angle.
+ *
+ * @param p The point to be rotated.
+ * @param origin The origin point around which the rotation occurs.
+ * @param theta The angle of rotation in radians.
+ * @return The rotated point after applying the specified rotation.
+ */
 sf::Vector2f rotatePoint(const sf::Vector2f &p, const sf::Vector2f &origin,
                          float theta);
 

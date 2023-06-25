@@ -1,15 +1,20 @@
-#include "Spring.h"
 #include <cmath>
-#include <iostream>
-#include <limits>
 
-Spring::Spring(float length, float K, sf::Vector2f p1, sf::Vector2f p2,
-               Weight *connectedWeight1, Weight *connectedWeight2)
-    : m_length(length), m_K(K), m_p1(p1), m_p2(p2),
-      m_connectedWeight1(connectedWeight1),
+#include "Spring.h"
+
+Spring::Spring(sf::Vector2f p1, sf::Vector2f p2, Weight *connectedWeight1,
+               Weight *connectedWeight2)
+    : m_p1(p1), m_p2(p2), m_connectedWeight1(connectedWeight1),
       m_connectedWeight2(connectedWeight2) {}
 
 void Spring::Update(float deltaTime, sf::RenderWindow &window) {
+  if (m_isBeingPlaced) {
+    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+    sf::Vector2f floatVector(static_cast<float>(mousePosition.x),
+                             static_cast<float>(mousePosition.y));
+    m_p2 = floatVector;
+  }
+
   // calculate the force using hooks law
 
   // need the current length of the spring
@@ -45,17 +50,17 @@ void Spring::Update(float deltaTime, sf::RenderWindow &window) {
 
     sf::Vector2f forceVec1 =
         diff / magnitude *
-        (force - 0.01f * std::hypot(m_connectedWeight1->getVelocity().x,
-                                    m_connectedWeight1->getVelocity().y));
-    m_connectedWeight1->applyForce(forceVec1, m_p1, window);
+        (force - 0.1f * std::hypot(m_connectedWeight1->getVelocity().x,
+                                   m_connectedWeight1->getVelocity().y));
+    m_connectedWeight1->applyForce(forceVec1, m_p1);
   }
 
   if (m_connectedWeight2 != nullptr) {
     sf::Vector2f forceVec2 =
         diff / magnitude *
-        (force - 0.01f * std::hypot(m_connectedWeight2->getVelocity().x,
-                                    m_connectedWeight2->getVelocity().y));
-    m_connectedWeight2->applyForce(-forceVec2, m_p2, window);
+        (force - 0.1f * std::hypot(m_connectedWeight2->getVelocity().x,
+                                   m_connectedWeight2->getVelocity().y));
+    m_connectedWeight2->applyForce(-forceVec2, m_p2);
   }
 }
 
@@ -81,43 +86,32 @@ void Spring::Show(sf::RenderWindow &window) {
     endPoint2 = m_connectedWeight2->localToGlobalCoordinates(endPoint2);
   }
 
-  // line[0].position = endPoint1;
-  // line[1].position = endPoint2;
-  // line[0].color = sf::Color::Red;
-  // line[1].color = sf::Color::Red;
 
-  // window.draw(line);
+  sf::VertexArray wave(sf::LineStrip);
 
+  // Define the properties of the sine wave
+  float amplitude = 10.0f; // Amplitude of the wave
+  int numPoints = 500;     // Number of points on the curve
 
+  // Calculate the angle between a and b
+  float angle = std::atan2(endPoint2.y - endPoint1.y, endPoint2.x - endPoint1.x);
 
-    sf::Vector2f a = endPoint1;
-    sf::Vector2f b = endPoint2;
+  float dist = std::hypot(endPoint1.x - endPoint2.x, endPoint1.y - endPoint2.y);
 
-    sf::VertexArray wave(sf::LineStrip);
-    wave.setPrimitiveType(sf::LineStrip);
+  for (int i = 0; i <= numPoints; ++i) {
+    float t = static_cast<float>(i) / numPoints;
+    float x = endPoint1.x + t * (dist);
+    float y = endPoint1.y + amplitude * std::sin((50 / dist) * M_PI * (x - endPoint1.x));
 
-    // Define the properties of the sine wave
-    float amplitude = 10.0f;   // Amplitude of the wave
-    int numPoints = 500;        // Number of points on the curve
+    // Rotate the point around point a
+    sf::Vector2f rotatedPoint;
+    rotatedPoint.x =
+        std::cos(angle) * (x - endPoint1.x) - std::sin(angle) * (y - endPoint1.y) + endPoint1.x;
+    rotatedPoint.y =
+        std::sin(angle) * (x - endPoint1.x) + std::cos(angle) * (y - endPoint1.y) + endPoint1.y;
 
-    // Calculate the angle between a and b
-    float angle = std::atan2(b.y - a.y, b.x - a.x);
-    angle = 3.1415f/2.f;
-    float dist = std::hypot(a.x-b.x, a.y-b.y);
-
-    for (int i = 0; i <= numPoints; ++i)
-    {
-        float t = static_cast<float>(i) / numPoints;
-        float x = a.x + t * (b.x - a.x);
-        float y = a.y + amplitude * std::sin(50/dist * 3.1415 * (x - a.x));
-
-        // Rotate the point around point a
-        sf::Vector2f rotatedPoint;
-        rotatedPoint.x = std::cos(angle) * (x - a.x) - std::sin(angle) * (y - a.y) + a.x;
-        rotatedPoint.y = std::sin(angle) * (x - a.x) + std::cos(angle) * (y - a.y) + a.y;
-
-        wave.append(sf::Vertex(rotatedPoint, sf::Color::Red));
-    }
+    wave.append(sf::Vertex(rotatedPoint, sf::Color(50, 50, 50)));
+  }
 
   window.draw(wave);
 }

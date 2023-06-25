@@ -1,9 +1,15 @@
 #include "EntityManager.h"
-#include <iostream>
 
-EntityManager::EntityManager() : m_weights(), m_springs() {}
+EntityManager& EntityManager::getInstance() {
+    static EntityManager instance;
+    return instance;
+}
+
+EntityManager::EntityManager()
+    : m_weights(), m_springs(), m_gameState(GameState::getInstance()) {}
 
 void EntityManager::Update(float deltaTime, sf::RenderWindow &window) {
+    if (m_gameState.isPaused()) {return;}
   for (auto &spring : m_springs) {
     spring->Update(deltaTime, window);
   }
@@ -14,7 +20,6 @@ void EntityManager::Update(float deltaTime, sf::RenderWindow &window) {
 }
 
 void EntityManager::Show(sf::RenderWindow &window) {
-
   for (auto spring : m_springs) {
     spring->Show(window);
   }

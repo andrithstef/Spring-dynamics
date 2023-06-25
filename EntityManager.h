@@ -1,16 +1,15 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <vector>
 
+#include "GameState.h"
 #include "Spring.h"
 #include "Weight.h"
 
 class EntityManager {
 
 public:
-  EntityManager();
-
+  static EntityManager &getInstance();
   /*
    * Update all entities stored in the entityManager
    */
@@ -26,12 +25,11 @@ public:
   void addWeight(Weight *w);
   void addSpring(Spring *s);
 
-  void printStatus() {
-    std::cout << m_weights.size() << std::endl;
-    std::cout << m_springs.size() << std::endl;
-  }
-
 private:
+  EntityManager();
+  EntityManager(const EntityManager &) = delete;
+  EntityManager &operator=(const EntityManager &) = delete;
   std::vector<Weight *> m_weights;
   std::vector<Spring *> m_springs;
+  GameState &m_gameState;
 };
