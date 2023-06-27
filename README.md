@@ -3,6 +3,8 @@
 
 This is a physics simulation written in C++ using SFML. It simulates the behavior of weights connected by springs and includes features such as gravity, torque, and angular momentum to create realistic movements.
 
+![demo](demo.gif)
+
 ## Features
 
 - Place weights and attach springs to simulate their interactions.

@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <cmath>
 
 #include "EntityManager.h"
 #include "InputHandler.h"
@@ -9,6 +10,7 @@ InputHandler::InputHandler() : m_gameState(GameState::getInstance()) {}
 
 void InputHandler::handleInputs(sf::RenderWindow &window,
                                 EntityManager &entityManager) {
+
   sf::Event event;
   while (window.pollEvent(event)) {
     if (event.type == sf::Event::Closed)
@@ -34,7 +36,8 @@ void InputHandler::handleKeyPress(sf::Event &event, sf::RenderWindow &window,
   if (event.key.code == sf::Keyboard::Escape) {
     togglePause();
   } else if (event.key.code == sf::Keyboard::W) {
-    if (m_isPlacingSpring || m_isPlacingWeight) {
+
+    if (m_isPlacingWeight || m_isPlacingSpring) {
       return;
     }
     // Reset the pressed state of all weights
@@ -50,7 +53,7 @@ void InputHandler::handleKeyPress(sf::Event &event, sf::RenderWindow &window,
     if (m_clickedWeight != nullptr) {
       m_clickedWeight->setIsPressed(false);
     }
-    m_isPlacingSpring = true;
+    m_clickedWeight = nullptr;
     handleStartPlacingSpring(window, entityManager);
   }
 }
@@ -73,6 +76,7 @@ void InputHandler::handleStartPlacingSpring(sf::RenderWindow &window,
                                             EntityManager &entityManager) {
   m_clickedWeight = nullptr;
   m_isPlacingWeight = false;
+  m_isPlacingSpring = true;
   sf::Vector2f p1 = getWorldPosition(window);
 
   Weight *startWeight = entityManager.getWeightFromPosition(p1);
@@ -80,6 +84,9 @@ void InputHandler::handleStartPlacingSpring(sf::RenderWindow &window,
     // the spring starts on a weight
     // need to convert from global coordinates to local coordinates
     p1 = startWeight->globalToLocalCoordinates(p1);
+    if (std::isnan(p1.x) || std::isnan(p1.y)) {
+      p1 = sf::Vector2f(0.f, 0.f);
+    }
   }
 
   sf::Vector2f p2 = getWorldPosition(window);
